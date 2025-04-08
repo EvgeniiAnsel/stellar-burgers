@@ -1,3 +1,14 @@
+export type TUserBurger = {
+  bun:
+    | {
+        name: string;
+        price: number;
+        image: string;
+      }
+    | undefined;
+  ingredients: TConstructorIngredient[];
+};
+
 export type TIngredient = {
   _id: string;
   name: string;
