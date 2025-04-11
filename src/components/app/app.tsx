@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-
 import {
   ConstructorPage,
   Feed,
@@ -10,7 +9,9 @@ import {
   ProfileOrders,
   Register,
   ResetPassword
-} from '@pages';
+} from '../../pages';
+
+import { OrderDetailsPage } from '../../pages/order-details-page/order-details-page';
 import '../../index.css';
 import styles from './app.module.css';
 import {
@@ -123,7 +124,14 @@ function App() {
               </div>
             }
           />
-
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <OrderDetailsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path='*'
             element={
