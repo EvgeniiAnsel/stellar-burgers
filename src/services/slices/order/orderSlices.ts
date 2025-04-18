@@ -25,12 +25,15 @@ export const initialState: OrderState = {
   error: ''
 };
 
+// orderSlices.ts
 export const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
     handleCloseOrderModal: (state) => {
       state.orderModalData = null;
+      state.lastOrderName = '';
+      state.orderAccept = false;
     }
   },
   extraReducers: (builder) => {
@@ -51,8 +54,7 @@ export const orderSlice = createSlice({
         state.orderModalData = action.payload.order;
         state.lastOrderName = action.payload.name;
       });
-  },
-  selectors: {}
+  }
 });
 
 export const { handleCloseOrderModal } = orderSlice.actions;

@@ -1,16 +1,17 @@
-import type { JestConfigWithTsJest } from 'ts-jest';
+import type { Config } from 'jest';
 
-const config: JestConfigWithTsJest = {
+const config: Config = {
+  preset: 'ts-jest',
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  moduleNameMapper: {
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@utils(.*)$': '<rootDir>/src/utils$1'
+  },
+  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageProvider: 'v8',
   transform: {
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        preset: 'ts-jest',
-        collectCoverage: true,
-        coverageDirectory: 'coverage',
-        coverageProvider: 'v8'
-      }
-    ]
+    '^.+\\.tsx?$': ['ts-jest', {}]
   }
 };
 
