@@ -24,6 +24,7 @@ export const loginUser = createAsyncThunk(
       return data;
     })
 );
+
 export const checkUserAuth = createAsyncThunk('user/checkUserAuth', getUserApi);
 
 export const registerUser = createAsyncThunk(
@@ -65,13 +66,15 @@ export const logoutUser = createAsyncThunk(
 
 export interface UserState {
   isAuthChecked: boolean;
+  isAuthenticated: boolean; // Добавлено
   userData: TUser | null;
   errorMessage: string | undefined;
   error: string | undefined;
 }
 
-const initialState: UserState = {
+export const initialState: UserState = {
   isAuthChecked: false,
+  isAuthenticated: false, // Добавлено
   userData: null,
   errorMessage: '',
   error: undefined
@@ -84,6 +87,14 @@ export const userSlice = createSlice({
     init: (state) => {},
     authCheck: (state) => {
       state.isAuthChecked = true;
+    },
+    checkUser: (state, action: { payload: TUser }) => {
+      state.userData = action.payload;
+    },
+    clearUserData: (state) => {
+      state.userData = null;
+      state.isAuthenticated = false;
+      state.isAuthChecked = true;
     }
   },
   extraReducers: (builder) => {
@@ -94,10 +105,16 @@ export const userSlice = createSlice({
       })
       .addCase(checkUserAuth.fulfilled, (state, action) => {
         state.isAuthChecked = true;
-        state.userData = action.payload.user;
+        if (action.payload.success) {
+          state.userData = action.payload.user;
+          state.isAuthenticated = true;
+        } else {
+          state.userData = null;
+          state.isAuthenticated = false;
+        }
       })
       // Вход
-      .addCase(loginUser.pending, (state, action) => {
+      .addCase(loginUser.pending, (state) => {
         state.errorMessage = '';
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -105,12 +122,20 @@ export const userSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.userData = action.payload.user;
-        state.isAuthChecked = true;
+        state.errorMessage = '';
+        state.isAuthenticated = true;
       })
       // Регистрация
+      .addCase(registerUser.pending, (state) => {
+        state.errorMessage = '';
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.errorMessage = action.error.message;
+      })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.userData = action.payload.user;
-        state.isAuthChecked = true;
+        state.errorMessage = '';
+        state.isAuthenticated = true;
       })
       // Выход
       .addCase(logoutUser.rejected, (state, action) => {
@@ -118,6 +143,7 @@ export const userSlice = createSlice({
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.userData = null;
+        state.isAuthenticated = false;
       })
       // Отправка почты для смены пароля (проверка на ошибку)
       .addCase(forgotPassword.rejected, (state, action) => {
@@ -135,13 +161,12 @@ export const userSlice = createSlice({
         state.userData = action.payload.user;
       });
   },
-
   selectors: {
     getUser: (state) => state.userData,
     getIsAuthChecked: (state) => state.isAuthChecked
   }
 });
 
-export const { init, authCheck } = userSlice.actions;
+export const { init, authCheck, checkUser, clearUserData } = userSlice.actions;
 
 export const { getUser, getIsAuthChecked } = userSlice.selectors;

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { v4 as uuid } from 'uuid';
 import { TConstructorIngredient, TIngredient } from '@utils-types';
+import { orderBurger } from '../order/orderSlices';
 
 export interface ConstructorState {
   bun: TConstructorIngredient | null;
@@ -36,11 +37,7 @@ export const constructorSlices = createSlice({
         state.bun = null;
       } else {
         state.ingredients = state.ingredients.filter(
-          (item: TConstructorIngredient) => {
-            if (item.id !== payload.id) {
-              return item;
-            }
-          }
+          (item: TConstructorIngredient) => item.id !== payload.id
         );
       }
     },
@@ -51,12 +48,11 @@ export const constructorSlices = createSlice({
       const index = state.ingredients.findIndex(
         (item) => item.id === payload.id
       );
-      state.ingredients.splice(
-        index - 1,
-        2,
-        state.ingredients[index],
-        state.ingredients[index - 1]
-      );
+      if (index > 0) {
+        const temp = state.ingredients[index];
+        state.ingredients[index] = state.ingredients[index - 1];
+        state.ingredients[index - 1] = temp;
+      }
     },
     handleMoveDownIngredient: (
       state,
@@ -65,19 +61,23 @@ export const constructorSlices = createSlice({
       const index = state.ingredients.findIndex(
         (item) => item.id === payload.id
       );
-      state.ingredients.splice(
-        index + 1,
-        2,
-        state.ingredients[index + 1],
-        state.ingredients[index]
-      );
+      if (index >= 0 && index < state.ingredients.length - 1) {
+        const temp = state.ingredients[index];
+        state.ingredients[index] = state.ingredients[index + 1];
+        state.ingredients[index + 1] = temp;
+      }
     },
     clearConstructorBurger: (state) => {
       state.bun = null;
       state.ingredients = [];
     }
   },
-  extraReducers: (builder) => {},
+  extraReducers: (builder) => {
+    builder.addCase(orderBurger.fulfilled, (state) => {
+      state.bun = null;
+      state.ingredients = [];
+    });
+  },
   selectors: {
     getIsBurger: (state) => ({
       bun: state.bun,
