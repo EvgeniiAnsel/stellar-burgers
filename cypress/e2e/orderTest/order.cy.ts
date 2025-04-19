@@ -12,6 +12,13 @@ describe('Order Creation', () => {
     cy.wait('@getIngredients');
   });
 
+  afterEach(() => {
+    // Очистка localStorage
+    cy.clearLocalStorage();
+    // Очистка cookie
+    cy.clearCookies();
+  });
+
   it('should create an order and reset constructor', () => {
     // Добавляем булку
     cy.contains('Краторная булка N-200i')
@@ -38,7 +45,7 @@ describe('Order Creation', () => {
 
     // Закрываем модалку
     cy.get('[data-cy="modal-close"]').click();
-    cy.get('[data-cy="order-modal"]').should('not.exist');
+    cy.get('[data-cy="modal"]').should('not.exist');
 
     // Проверяем сброс конструктора
     cy.get('[data-cy="constructor-item"]').should('have.length', 0);
