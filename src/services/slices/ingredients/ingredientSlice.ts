@@ -8,10 +8,10 @@ export const loadIngredientList = createAsyncThunk(
 );
 
 export interface IngredientsState {
-  ingredientList: TIngredient[] | [];
-  buns: TIngredient[] | [];
-  mains: TIngredient[] | [];
-  sauces: TIngredient[] | [];
+  ingredientList: TIngredient[];
+  buns: TIngredient[];
+  mains: TIngredient[];
+  sauces: TIngredient[];
   isIngredientsLoading: boolean;
   error: string | undefined;
 }
@@ -30,21 +30,27 @@ export const ingredientsSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // 1. Pending
+    builder.addCase(loadIngredientList.pending, (state) => {
+      state.isIngredientsLoading = true;
+      state.error = '';
+    });
+
+    // 2. Rejected
+    builder.addCase(loadIngredientList.rejected, (state, action) => {
+      state.isIngredientsLoading = false;
+      state.error = action.error.message || 'Неизвестная ошибка';
+    });
+
+    // 3. Fulfilled
     builder.addCase(loadIngredientList.fulfilled, (state, action) => {
       state.isIngredientsLoading = false;
-      state.buns = [];
-      state.mains = [];
-      state.sauces = [];
       state.ingredientList = action.payload;
-      action.payload.map((item: TIngredient) => {
-        if (item.type === 'bun') {
-          state.buns = [...state.buns, item];
-        } else if (item.type === 'main') {
-          state.mains = [...state.mains, item];
-        } else if (item.type === 'sauce') {
-          state.sauces = [...state.sauces, item];
-        }
-      });
+
+      // Корректная фильтрация списков
+      state.buns = action.payload.filter((item) => item.type === 'bun');
+      state.mains = action.payload.filter((item) => item.type === 'main');
+      state.sauces = action.payload.filter((item) => item.type === 'sauce');
     });
   },
   selectors: {
